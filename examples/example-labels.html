@@ -35,37 +35,48 @@
         function draw() {
             var config = {
                 container_id: "viz",
-                server_url: "bolt://54.209.44.254:33146",
+                server_url: "bolt://127.0.0.1:7687",
                 server_user: "neo4j",
-                server_password: "investigators-spill-future",
+                server_password: "secret123",
+                arrows: true,
                 labels: {
                     //"Character": "name",
-                    "Person": {
+                    "Platform": {
                         "caption": "name",
-                        "size": 1.0,
-                        "sizeCypher": "MATCH (n) WHERE id(n) = {id} RETURN SIZE((n)--()) AS s;",
-                        "icon": "????"
+                        "size": 1,
+                        "community": "community"
                     },
-                    "Organization": {
+                    "Supplier": {
                         "caption": "name",
-                        "size": 2.0,
-                        "sizeCypher": "MATCH (n) WHERE id(n) = {id} RETURN SIZE((n)--()) AS s",
-                        "icon": "???"
+                        "size": 1,
+                    },
+                    "Customer": {
+                        "caption": "name",
+                        "size": 1,
                     }
-
                 },
                 relationships: {
-                    "PRESIDENT": {
-                        "caption": "El Presidente"
+                    "DISPATCHES_FROM": {
+                        "thickness": 1,
+                        "caption": false,
+                    },
+                    "CONNECTS": {
+                        "thickness": 1,
+                        "caption": false,
+                    },
+                    "GET_DELIVERED": {
+                        "thickness": 1,
+                        "caption": false
                     }
                 },
-                initial_cypher: "match (p:Person)-[r]-(o:Organization)-[r1]-(p2:Person) RETURN * LIMIT 10",
-                arrows: false
             };
 
             viz = new NeoVis.default(config);
+            const doSomething = (data) => {
+                console.log('Node clicked', data);
+            };
+            viz.registerOnEvent('click', doSomething);
             viz.render();
-            console.log(viz);
 
         }
     </script>
@@ -74,7 +85,7 @@
 <div id="viz"></div>
 
 
-Cypher query: <textarea rows="4" cols=50 id="cypher"></textarea><br>
+Cypher query: <textarea rows="4" cols=50 id="cypher">MATCH (p1)-[route]->(p2) RETURN p1, route, p2</textarea><br>
 <input type="submit" value="Submit" id="reload">
 
 
@@ -90,9 +101,7 @@ Cypher query: <textarea rows="4" cols=50 id="cypher"></textarea><br>
         } else {
             console.log("reload");
             viz.reload();
-
         }
-
     });
 
 </script>

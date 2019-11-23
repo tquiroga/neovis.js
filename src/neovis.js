@@ -4,12 +4,16 @@ import Neo4j from 'neo4j-driver';
 import * as vis from 'vis/dist/vis-network.min';
 import 'vis/dist/vis-network.min.css';
 import { defaults } from './defaults';
-import { EventController, CompletionEvent } from './events';
+import { EventController, CompletionEvent, ClickEvent } from './events';
 
 export default class NeoVis {
 	_nodes = {};
 	_edges = {};
 	_data = {};
+	_original = {
+		nodes: [],
+		edges: [],
+	};
 	_network = null;
 	_events = new EventController();
 
@@ -55,6 +59,14 @@ export default class NeoVis {
 		);
 		this._query = config.initial_cypher || defaults.neo4j.initialQuery;
 		this._container = document.getElementById(config.container_id);
+	}
+
+	_addOriginalNode(node) {
+		this._original.nodes[node.identity.low] = { id: node.identity.low, labels: node.labels, type: 'node', ...node.properties };
+	}
+
+	_addOriginalEdge(edge) {
+		this._original.edges[edge.identity.low] = { id: edge.identity.low, labels: [edge.type], type: 'edge', ...edge.properties };
 	}
 
 	_addNode(node) {
@@ -232,6 +244,7 @@ export default class NeoVis {
 						this._consoleLog('Constructor:');
 						this._consoleLog(v && v.constructor.name);
 						if (v instanceof Neo4j.types.Node) {
+							this._addOriginalNode(v);
 							let node = await this.buildNodeVisObject(v);
 							try {
 								this._addNode(node);
@@ -241,6 +254,7 @@ export default class NeoVis {
 
 						} else if (v instanceof Neo4j.types.Relationship) {
 							let edge = this.buildEdgeVisObject(v);
+							this._addOriginalEdge(v);
 							this._addEdge(edge);
 
 						} else if (v instanceof Neo4j.types.Path) {
@@ -349,6 +363,16 @@ export default class NeoVis {
 					//     }
 					// );
 					this._network = new vis.Network(container, this._data, options);
+					this._network.on('click', ({ nodes, edges }) => {
+						if (edges.length > 0 || nodes.length > 0) {
+							if (!nodes.length && edges.length) {
+								this._events.generateEvent(ClickEvent, this._original.nodes[edges[0]]);
+							} else {
+								this._events.generateEvent(ClickEvent, this._original.edges[nodes[0]]);
+							}
+						}
+					});
+
 					this._consoleLog('completed');
 					setTimeout(
 						() => {
