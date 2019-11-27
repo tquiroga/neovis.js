@@ -253,8 +253,8 @@ export default class NeoVis {
 							}
 
 						} else if (v instanceof Neo4j.types.Relationship) {
-							let edge = this.buildEdgeVisObject(v);
 							this._addOriginalEdge(v);
+							let edge = this.buildEdgeVisObject(v);
 							this._addEdge(edge);
 
 						} else if (v instanceof Neo4j.types.Path) {
@@ -366,9 +366,9 @@ export default class NeoVis {
 					this._network.on('click', ({ nodes, edges }) => {
 						if (edges.length > 0 || nodes.length > 0) {
 							if (!nodes.length && edges.length) {
-								this._events.generateEvent(ClickEvent, this._original.nodes[edges[0]]);
+								this._events.generateEvent(ClickEvent, this.toJavascriptTypes(this._original.edges[edges[0]]));
 							} else {
-								this._events.generateEvent(ClickEvent, this._original.edges[nodes[0]]);
+								this._events.generateEvent(ClickEvent, this.toJavascriptTypes(this._original.nodes[nodes[0]]));
 							}
 						}
 					});
@@ -442,6 +442,24 @@ export default class NeoVis {
 		this.clearNetwork();
 		this._query = query;
 		this.render();
+	}
+
+	toJavascriptTypes(obj) {
+		const newObj = {};
+		Object.keys(obj).forEach((key) => {
+			if (typeof obj[key] === 'object') {
+				if (obj[key].hasOwnProperty('low')) {
+					newObj[key] = obj[key].low;
+				}
+			}
+			// @TODO match duration format
+			// @TODO match time format
+			else {
+				newObj[key] = obj[key];
+			}
+		});
+
+		return newObj;
 	}
 
 // configure exports based on environment (ie Node.js or browser)

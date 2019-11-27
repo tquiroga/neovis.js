@@ -1,5 +1,5 @@
 export const CompletionEvent = 'completed';
-export const ClickEvent = 'click';
+export const ClickEvent = 'clicked';
 
 export class EventController {
 
@@ -29,6 +29,7 @@ export class EventController {
 	 * @param {object} values - Values associated to the event
 	 */
 	generateEvent(eventType, values) {
+		// console.log(eventType);
 		if (this._handlers[eventType] === undefined) {
 			throw new Error('Unknown event: ' + eventType);
 		}
