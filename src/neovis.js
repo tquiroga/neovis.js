@@ -162,11 +162,12 @@ export default class NeoVis {
 		}
 		// set all properties as tooltip
 		node.title = '';
-		for (let key in neo4jNode.properties) {
-			if (neo4jNode.properties.hasOwnProperty(key)) {
-				node.title += `<strong>${key}:</strong> ${neo4jNode.properties[key]}<br>`;
-			}
-		}
+		// -- DISABLE tooltip
+		// for (let key in neo4jNode.properties) {
+		// 	if (neo4jNode.properties.hasOwnProperty(key)) {
+		// 		node.title += `<strong>${key}:</strong> ${neo4jNode.properties[key]}<br>`;
+		// 	}
+		// }
 		return node;
 	}
 
@@ -187,11 +188,12 @@ export default class NeoVis {
 
 		// hover tooltip. show all properties in the format <strong>key:</strong> value
 		edge.title = '';
-		for (let key in r.properties) {
-			if (r.properties.hasOwnProperty(key)) {
-				edge['title'] += `<strong>${key}:</strong> ${r.properties[key]}<br>`;
-			}
-		}
+		// Disable title
+		// for (let key in r.properties) {
+		// 	if (r.properties.hasOwnProperty(key)) {
+		// 		edge['title'] += `<strong>${key}:</strong> ${r.properties[key]}<br>`;
+		// 	}
+		// }
 
 		// set relationship thickness
 		if (weightKey && typeof weightKey === 'string') {
