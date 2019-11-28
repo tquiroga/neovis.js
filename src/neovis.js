@@ -220,7 +220,6 @@ export default class NeoVis {
 		if (this._config.colors && this._config.colors.edges) {
 			const colorsKeys = Object.keys(this._config.colors.edges);
 			if (colorsKeys.indexOf(label) !== -1) {
-				console.log('Applying color to ', label, this._config.colors.edges[label]);
 				edge.color = this._config.colors.edges[label];
 			}
 		}
