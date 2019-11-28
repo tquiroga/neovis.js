@@ -62,11 +62,11 @@ export default class NeoVis {
 	}
 
 	_addOriginalNode(node) {
-		this._original.nodes[node.identity.low] = { id: node.identity.low, labels: node.labels, type: 'node', ...node.properties };
+		this._original.nodes[node.identity.low] = { id: node.identity.low, type: 'node', label: node.labels.length > 0 && node.labels[0], ...node.properties };
 	}
 
 	_addOriginalEdge(edge) {
-		this._original.edges[edge.identity.low] = { id: edge.identity.low, labels: [edge.type], type: 'edge', ...edge.properties };
+		this._original.edges[edge.identity.low] = { id: edge.identity.low, label: edge.type, type: 'edge', ...edge.properties };
 	}
 
 	_addNode(node) {
@@ -145,29 +145,39 @@ export default class NeoVis {
 
 		// community
 		// behavior: color by value of community property (if set in config), then color by label
-		if (!communityKey) {
-			node.group = label;
-		} else {
-			try {
-				if (neo4jNode.properties[communityKey]) {
-					node.group = neo4jNode.properties[communityKey].toNumber() || label || 0;  // FIXME: cast to Integer
+		// if (!communityKey) {
+		// 	node.group = label;
+		// } else {
+		// 	try {
+		// 		if (neo4jNode.properties[communityKey]) {
+		// 			node.group = neo4jNode.properties[communityKey].toNumber() || label || 0;  // FIXME: cast to Integer
 
-				} else {
-					node.group = 0;
-				}
+		// 		} else {
+		// 			node.group = 0;
+		// 		}
 
-			} catch (e) {
-				node.group = 0;
+		// 	} catch (e) {
+		// 		node.group = 0;
+		// 	}
+		// }
+
+		// Apply custom Colors to nodes
+		if (this._config.colors && this._config.colors.nodes) {
+			const colorsKeys = Object.keys(this._config.colors.nodes);
+			if (colorsKeys.indexOf(label) !== -1) {
+				node.color = this._config.colors.nodes[label];
 			}
 		}
+
 		// set all properties as tooltip
-		node.title = '';
+		// node.title = '';
 		// -- DISABLE tooltip
 		// for (let key in neo4jNode.properties) {
 		// 	if (neo4jNode.properties.hasOwnProperty(key)) {
 		// 		node.title += `<strong>${key}:</strong> ${neo4jNode.properties[key]}<br>`;
 		// 	}
 		// }
+
 		return node;
 	}
 
@@ -186,8 +196,10 @@ export default class NeoVis {
 		edge.from = r.start.toInt();
 		edge.to = r.end.toInt();
 
+		const label = r.type;
+
 		// hover tooltip. show all properties in the format <strong>key:</strong> value
-		edge.title = '';
+		// edge.title = '';
 		// Disable title
 		// for (let key in r.properties) {
 		// 	if (r.properties.hasOwnProperty(key)) {
@@ -204,9 +216,16 @@ export default class NeoVis {
 			edge.value = 1.0;
 		}
 
+		// Apply custom color
+		if (this._config.colors && this._config.colors.edges) {
+			const colorsKeys = Object.keys(this._config.colors.edges);
+			if (colorsKeys.indexOf(label) !== -1) {
+				console.log('Applying color to ', label, this._config.colors.edges[label]);
+				edge.color = this._config.colors.edges[label];
+			}
+		}
+
 		// set caption
-
-
 		if (typeof captionKey === 'boolean') {
 			if (!captionKey) {
 				edge.label = '';
@@ -296,6 +315,9 @@ export default class NeoVis {
 					await Promise.all(dataBuildPromises);
 					session.close();
 					let options = {
+						interaction: {
+							hover: false
+						},
 						nodes: {
 							shape: 'dot',
 							font: {

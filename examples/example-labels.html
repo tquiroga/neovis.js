@@ -46,7 +46,6 @@
                     "Platform": {
                         "caption": "name",
                         "size": 1,
-                        "community": "community"
                     },
                     "Supplier": {
                         "caption": "name",
@@ -71,6 +70,19 @@
                         "caption": false
                     }
                 },
+                initial_cypher: "MATCH (p1)-[route]->(p2) RETURN p1, route, p2",
+                colors: {
+                    nodes: {
+                        "Supplier": '#2980b9',
+                        "Customer": '#16a085',
+                        "Platform": '#8e44ad',
+                    },
+                    edges: {
+                        "CONNECTS": {color: '#34495e'},
+                        "GET_DELIVERED": {color: '#2ecc71', inherit: 'to'},
+                        "DISPATCHES_FROM": {color: '#16a085'},
+                    }
+                }
             };
 
             viz = new NeoVis.default(config);
